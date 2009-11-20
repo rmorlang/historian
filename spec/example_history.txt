@@ -1,0 +1,24 @@
+This is some text at the top of the history file. It should be left alone.
+
+== In Git
+
+This is a release section, representing in-progress (unreleased changes). This
+paragraph should be left alone.
+
+=== A Section
+* this is an entry in a section
+
+This is more freeform text. A section, like the one above, categorizes the
+information in the list below it. Common section names might include things
+like "New Features", "Bugfixes", "Minor Enhancements", etc.
+
+=== Another Section
+* this is an entry too
+* and another entry
+
+== 1.0.0 2009-01-01
+
+This is some freeform text that is part of an entirely different release section.
+Specifically, this is release 1.0.0, which it should be possible to find via
+'historian status 1.0.0'. The status command should ignore the date.
+

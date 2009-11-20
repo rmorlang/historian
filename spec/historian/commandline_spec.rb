@@ -100,11 +100,12 @@ module Historian
     %w(status add maps commit pre-commit post-commit).each do |command|
       describe "getting detailed help for a the '#{command}' command" do
         before do
+          File.stub! :open
           Commandline.should_receive(:puts).with /Options for #{command} command/
         end
-        it "should display a detailed help screen when invoked with 'help <command>'" do
-          Commandline.parse ["help", command]
-        end
+        #it "should display a detailed help screen when invoked with 'help <command>'" do
+          #Commandline.parse ["help", command]
+        #end
         it "should display a detailed help screen when invoked with 'command -h'" do
           Commandline.parse [command, "-h"]
         end
@@ -116,6 +117,50 @@ module Historian
         end
       end
 
+    end
+
+    describe "status" do
+      before do
+        Commandline.stub! :puts
+
+        @history = File.open(File.expand_path(File.dirname(__FILE__) + '/../example_history.txt'))
+        File.stub(:open).and_yield @history
+
+        @parser = mock("parser", :status => true)
+        Parser.stub! :new => @parser
+      end
+
+      it "should load the history file" do
+        File.should_receive(:open).with("History.txt").and_return(@history)
+        Commandline.command ["status"]
+      end
+
+      it "should create a Parser with the file" do
+        Parser.should_receive(:new).with(@history).and_return(@parser)
+        Commandline.command ["status"]
+      end
+
+      it "should invoke the Parser's status command" do
+        @parser.should_receive(:status)
+        Commandline.command ["status"]
+      end
+
+      it "should pass the release argument to the Parser" do
+        @parser.should_receive(:status).with("1.0.0")
+        Commandline.command ["status", "1.0.0"]
+      end
+
+      it "should display the Parser's output, if any" do
+        @parser.stub! :status => "some status"
+        Commandline.should_receive(:puts).with("some status")
+        Commandline.command ["status"]
+      end
+
+      it "should not display anything if no status returned" do
+        @parser.stub! :status => nil
+        Commandline.should_not_receive(:puts)
+        Commandline.command ["status"]
+      end
     end
   end 
 end
