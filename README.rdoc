@@ -1,6 +1,17 @@
 = historian
 
-Description goes here.
+Historian is a commandline utility with optional Git integration hooks that
+helps manage your project's history.txt file, or whatever it is you call it.
+
+
+== Usage
+
+history status [release]
+history add    [key=val ..]
+history maps
+history commit -m message
+history pre-commit-message
+history post-commit
 
 == Note on Patches/Pull Requests
  
