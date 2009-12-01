@@ -43,41 +43,49 @@ EOF
         command args
       end
 
-      def invoke_status(parser, args)
-        parser.parse! args
-        config = OpenStruct.new
+      def config
+        OpenStruct.new
+      end
+
+
+      def invoke_status(option_parser, args)
+        option_parser.parse! args
         history = File.open("History.txt") do |f|
           parser = Parser.new(f, config)
-          status = parser.status
+          status = parser.status *args
           puts status if status
         end
       end
 
-      def invoke_add(parser, args)
-        parser.parse! args
+      def invoke_add(option_parser, args)
+        option_parser.parse! args
+        history = File.open("History.txt") do |f|
+          parser = Parser.new(f, config)
+          parser.add *args
+        end
       end
 
-      def invoke_maps(parser, args)
-        parser.parse! args
+      def invoke_maps(option_parser, args)
+        option_parser.parse! args
       end
 
-      def invoke_commit(parser, args)
-        parser.parse! args
+      def invoke_commit(option_parser, args)
+        option_parser.parse! args
       end
 
-      def invoke_pre_commit(parser, args)
-        parser.parse! args
+      def invoke_pre_commit(option_parser, args)
+        option_parser.parse! args
       end
 
-      def invoke_post_commit(parser, args)
-        parser.parse! args
+      def invoke_post_commit(option_parser, args)
+        option_parser.parse! args
       end
 
       def command(args)
         command = args.shift
-        parser = parser_for_command command
+        option_parser = option_parser_for_command command
         method = ("invoke_" + command.gsub(/-/,"_")).to_sym
-        send method, parser, args
+        send method, option_parser, args
       end
 
       def unknown_command(command)
@@ -104,8 +112,8 @@ EOF
 
       protected
       
-      def parser_for_command command
-        parser = OptionParser.new do |parser|
+      def option_parser_for_command command
+        option_parser = OptionParser.new do |parser|
           parser.banner = BANNERS[command.to_sym]
           parser.separator " "
           parser.separator "Options for #{command} command:"
