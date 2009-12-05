@@ -44,7 +44,10 @@ EOF
       end
 
       def config
-        OpenStruct.new
+        return @config if @config
+        @config = OpenStruct.new
+        @config.map ||= {}
+        @config
       end
 
 

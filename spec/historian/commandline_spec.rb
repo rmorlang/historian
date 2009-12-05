@@ -2,6 +2,12 @@ require File.expand_path(File.dirname(__FILE__) + '/../spec_helper')
 
 module Historian
   describe Commandline do
+    describe "config" do
+      it "should return an object with a map method that returns an Array" do
+        Commandline.config.should respond_to(:map)
+        Commandline.config.map.should be_a_kind_of(Hash)
+      end
+    end
     describe "parse" do
       before do
         Commandline.stub! :puts
