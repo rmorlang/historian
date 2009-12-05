@@ -62,9 +62,21 @@ EOF
 
       def invoke_add(option_parser, args)
         option_parser.parse! args
-        history = File.open("History.txt") do |f|
+        new_history = nil
+        File.open("History.txt") do |f|
           parser = Parser.new(f, config)
-          parser.add *args
+          additions = args.inject({}) do |memo, arg|
+            key, value = arg.split "="
+            (memo[key.to_sym] ||= []) << value
+            memo
+          end
+          new_history = parser.add additions
+        end
+
+        if new_history
+          File.open("History.txt", "w") do |f|
+            f.puts new_history.join
+          end
         end
       end
 

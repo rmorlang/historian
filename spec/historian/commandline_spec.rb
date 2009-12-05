@@ -174,41 +174,59 @@ module Historian
         Commandline.stub! :puts
 
         @history = File.open(File.expand_path(File.dirname(__FILE__) + '/../example_history.txt'))
+        @history.stub! :puts => true
         File.stub(:open).and_yield @history
 
-        @parser = mock("parser", :add => true)
+        @parser = mock("parser", :add => ["foo", "bar"])
         Parser.stub! :new => @parser
       end
 
-      xit "should load the history file" do
-        File.should_receive(:open).with("History.txt").and_return(@history)
-        Commandline.command ["status"]
+      def do_test
+        Commandline.command [
+          "add",
+          "minor=this is a minor feature",
+          "minor=another minor feature",
+          "bugfix=this is a bugfix"
+        ]
       end
 
-      xit "should create a Parser with the file" do
-        Parser.should_receive(:new).with(@history).and_return(@parser)
-        Commandline.command ["status"]
+      it "should load the history file" do
+        File.should_receive(:open).with("History.txt").and_return(@history)
+        do_test
+      end
+
+      it "should create a Parser with the file" do
+        Parser.should_receive(:new).with(@history, anything).and_return(@parser)
+        do_test
       end
 
       it "should invoke the Parser's add command" do
         @parser.should_receive(:add)
-        Commandline.command ["add"]
+        do_test
       end
 
-      xit "should pass the release argument to the Parser" do
-        @parser.should_receive(:status).with("1.0.0")
-        Commandline.command ["status", "1.0.0"]
+      it "should pass the release argument to the Parser" do
+        @parser.should_receive(:add).with({
+          :minor => ['this is a minor feature', 'another minor feature'],
+          :bugfix => ['this is a bugfix']
+        })
+        do_test
       end
 
-      xit "should display the Parser's output, if any" do
-        @parser.stub! :status => "some status"
-        Commandline.should_receive(:puts).with("some status")
-        Commandline.command ["status"]
+      it "should rewrite the history file" do
+        File.should_receive(:open).with("History.txt")
+        File.should_receive(:open).with("History.txt","w").and_return(@history)
+        do_test
+      end
+
+      it "should write the new history to the file" do
+        @history.should_receive(:puts).with(/foo/).at_least(:once)
+        do_test
       end
 
       it "should not display anything" do
         Commandline.should_not_receive(:puts)
-        Commandline.command ["add"]
+        do_test
       end
     end
   end
