@@ -183,9 +183,9 @@ module Historian
 
       def do_test
         Commandline.command [
-          "add",
-          "minor=this is a minor feature",
-          "minor=another minor feature",
+          "add", 
+          "minor=this is a minor feature", 
+          "minor=another minor feature", 
           "bugfix=this is a bugfix"
         ]
       end
@@ -214,7 +214,7 @@ module Historian
       end
 
       it "should rewrite the history file" do
-        File.should_receive(:open).with("History.txt")
+        File.should_receive(:open).with("History.txt")        
         File.should_receive(:open).with("History.txt","w").and_return(@history)
         do_test
       end
