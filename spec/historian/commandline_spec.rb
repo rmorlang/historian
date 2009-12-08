@@ -175,7 +175,7 @@ module Historian
 
         @history = File.open(File.expand_path(File.dirname(__FILE__) + '/../example_history.txt'))
         @history.stub! :puts => true
-        File.stub(:open).and_yield @history
+        File.stub!( :open => @history, :exists? => true)
 
         @parser = mock("parser", :add => ["foo", "bar"])
         Parser.stub! :new => @parser
@@ -190,14 +190,23 @@ module Historian
         ]
       end
 
-      it "should load the history file" do
-        File.should_receive(:open).with("History.txt").and_return(@history)
+      it "should not the history file if doesn't exist" do
+        File.should_receive(:exists?).with("History.txt").and_return(false)
+        File.should_not_receive(:open).with("History.txt")
         do_test
       end
 
-      it "should create a Parser with the file" do
-        Parser.should_receive(:new).with(@history, anything).and_return(@parser)
-        do_test
+      describe "when the history file exists" do
+        it "should load the history file" do
+          File.should_receive(:exists?).with("History.txt").and_return(true)
+          File.should_receive(:open).with("History.txt").and_return(@history)
+          do_test
+        end
+
+        it "should create a Parser with the file" do
+          Parser.should_receive(:new).with(@history, anything).and_return(@parser)
+          do_test
+        end
       end
 
       it "should invoke the Parser's add command" do
@@ -220,6 +229,7 @@ module Historian
       end
 
       it "should write the new history to the file" do
+        File.should_receive(:open).with("History.txt", "w").and_yield @history
         @history.should_receive(:puts).with(/foo/).at_least(:once)
         do_test
       end
