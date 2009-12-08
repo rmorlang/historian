@@ -51,10 +51,13 @@ EOF
         @config
       end
 
+      def history_file
+        "History.txt"
+      end
 
       def invoke_status(option_parser, args)
         option_parser.parse! args
-        history = File.open("History.txt") do |f|
+        history = File.open(history_file) do |f|
           parser = Parser.new(f, config)
           status = parser.status *args
           puts status if status
@@ -64,8 +67,8 @@ EOF
       def invoke_add(option_parser, args)
         option_parser.parse! args
         new_history = nil
-        f = if File.exists? "History.txt"
-              File.open("History.txt")
+        f = if File.exists? history_file
+              File.open(history_file)
             else
               StringIO.new
             end
@@ -80,7 +83,7 @@ EOF
         new_history = parser.add additions
         
         if new_history
-          File.open("History.txt", "w") do |f|
+          File.open(history_file, "w") do |f|
             f.puts new_history.join
           end
         end
