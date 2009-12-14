@@ -45,10 +45,7 @@ EOF
       end
 
       def config
-        return @config if @config
-        @config = OpenStruct.new
-        @config.map ||= {}
-        @config
+        @config ||= Configuration.new
       end
 
       def history_file
