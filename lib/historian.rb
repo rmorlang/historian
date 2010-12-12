@@ -1,4 +1,4 @@
-require "historian/configuration"
-require "historian/parser"
-require "historian/commandline"
+module Historian
+end
+require "historian/history_file"
 
