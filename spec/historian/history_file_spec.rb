@@ -1,9 +1,5 @@
 require 'spec_helper'
 
-def fixture(name)
-  File.read(File.expand_path("../../fixtures/#{name}", __FILE__)).strip
-end
-
 describe Historian::HistoryFile do
   context "with no history" do
     before do
