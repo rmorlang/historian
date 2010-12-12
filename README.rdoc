@@ -1,20 +1,140 @@
-= historian
+= Historian
 
-Historian is a commandline utility with optional Git integration hooks that
-helps manage your project's history.txt file, or whatever it is you call it.
+Historian automatically maintains your project's History.txt file
+based on your git changelogs, and can automatically perform
+releases for you.
 
+== Historian is Opinionated Software
+
+Historian makes a number of assumptions. You might not like them.
+It works well for how I like to work, but patches are welcome.
+
+* it (pretty much) works only with Git
+* it updates history in +History.txt+ in your project root dir
+* it writes your +History.txt+ file in Markdown format
+* it considers three levels of "significance": major changes, minor changes, and bugfixes
+* it generates version numbers when a release is triggered
+* version numbers are in x.y.z format (major.minor.patch)
+* the significance of changes controls how version numbers are incremented
 
 == Usage
 
-history status [release]
-history add    [key=val ..]
-history maps
-history commit -m message
-history pre-commit-message
-history post-commit
+Install Historian's git commit hooks in your current git repository.
+
+  historian install
+
+Make some changes, and run +git commit+. In your commit message,
+prefix any lines you'd like to make part of your history with
+one of the following tags, according to the significance of the
+change message:
+
+M:: A major change
+m:: A minor change
+b:: A bugfix
+
+For example, suppose your commit message would normally have
+been:
+
+  Rewrote network protocol, breaking compatibility with old clients.
+
+With Historian, this becomes:
+
+  M:Rewrote network protocol, breaking compatibility with old clients.
+
+The "M:" will be stripped out of the commit message, so it won't
+show up that way in your commit history. However, Historian will
+use the content on the line where the M: appears to update the
+history file. If you had no +History.txt+ file before now, one
+will be created with the following content:
+
+  ## In Git
+
+  ### Major Changes
+  * Rewrote network protocol, breaking compatibility with old clients.
+
+Historian will bundle the change to +History.txt+ as part of your
+commit.
+
+== Adding history without it showing in your commit log
+
+You can also insert history entries that don't show up in your
+commit logs, if you prefer. Example syntax of a commit message.
+
+  Replaced ASCII protocol with XML syntax.
+
+  M#:Rewrote network protocol, breaking compatibility with old clients.
+
+Note the "#" before the colon. This tells Historian to suppress the
+content of that line in the commit message, so your commit log will
+only show:
+
+  Replaced ASCII protocol with XML syntax.
+
+
+== Triggering releases
+
+You can also tell Historian that this commit marks a new release.
+Any line that begins with a bang-colon "!:" will trigger a release.
+The rest of the line can be empty, or it can optionally contain
+a "friendly name" for the release. Examples:
+
+  !:Flux Capacitor PRO
+
+Or, in Debian/Ubuntu style:
+
+  !:Addled Adder
+
+When a release is triggered, Historian will check the recent History
+for major, minor, and bugfix entries to determine if this is a
+major, minor or bugfix release. Historian refers to this as
+"significance."
+
+Historian will also determine the most recent release number from
+the History.txt file, or will default to "0.0.0".
+
+Historian will calculate a new version number by incrementing the
+appropriate major, minor, or patch triplet based on the significance
+of the release.
+
+Historian will update the +History.txt+ file with a header for
+the recent history that contains the version number, date, and
+(if specified) the release name.
+
+Finally, Historian will create an annotated tag in git with the
+version number of the release. The tag contents will contain
+the changelog.
+
+== Multiple history entries
+
+Historian allows multiple entries, if you like. Example commit
+message:
+
+  Numerous minor bugfixes
+
+  b: * eliminated crash when ip address not specified
+  b: * logs now include hostnames
+  b: * new connections append to logfiles instead of clobbering them
+
+Note that any non-alphanumeric content after the colon is ignored,
+so the history entries will not include the " * ".
+
+== Manual Invocation
+
+You can use Historian in a limited way from the commandline. These
+forms update +History.txt+ only, and do not interact with Git.
+
+The following will add two new history entries.
+
+  history update major="rewrote network protocol" \
+                 bugfix="fixed null reference crash"
+
+This will increment the version number.
+
+  history release
+
 
 == Note on Patches/Pull Requests
- 
+
 * Fork the project.
 * Make your feature addition or bug fix.
 * Add tests for it. This is important so I don't break it in a
