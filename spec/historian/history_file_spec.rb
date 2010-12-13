@@ -147,6 +147,9 @@ describe Historian::HistoryFile do
     it "returns the release name with #release_name" do
       subject.current_release_name.should eq("Courageous Camel")
     end
+    it "returns the changelog for the release" do
+      subject.release_log.strip.should eql(fixture :courageous_camel_release_log)
+    end
 
   end
 

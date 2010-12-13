@@ -29,7 +29,7 @@ end
 
 RSpec::Matchers.define :have_changelog_like do |history_key|
   match do |actual|
-    actual.changelog == fixture(history_key)
+    actual.changelog.strip == fixture(history_key)
   end
   failure_message_for_should do |actual|
     RSpec::Expectations::Differ.new.diff_as_string(actual.changelog, fixture(history_key))
@@ -38,7 +38,7 @@ end
 
 RSpec::Matchers.define :have_release_log_like do |history_key|
   match do |actual|
-    actual.release_log == fixture(history_key)
+    actual.release_log.strip == fixture(history_key)
   end
   failure_message_for_should do |actual|
     if actual.release_log.nil?

@@ -87,6 +87,7 @@ module Historian
     # If a release was just performed, this will return the changelog
     # of the release. Otherwise, this is always nil.
     def release_log
+      parse unless parsed?
       @release_log
     end
 
@@ -144,13 +145,15 @@ module Historian
     def parse #:nodoc:
       rewind
       @buffer = []
-      gathering_current_history = true
+      @release_log = []
+      state = :gathering_current_history
       significance = nil
       each_line do |line|
-        if gathering_current_history
+        if state == :gathering_current_history
           case line
-          when /^== ([0-9]+\.[0-9]+\.[0-9]+)/
-            gathering_current_history = false
+          when /^== ([0-9]+\.[0-9]+\.[0-9]+)(.*)/
+            state = :gathering_previous_release_log
+            @release_log << line
             @buffer << line
             @current_version = $1
             if $2 =~ %r{ (.*) - [0-9]{4}/[0-9]{2}/[0-9]{2}}
@@ -161,10 +164,18 @@ module Historian
           when /^\* (.+)$/
             changes[significance] << $1
           end
+        elsif state == :gathering_previous_release_log
+          if line =~ /^== ([0-9]+\.[0-9]+\.[0-9]+)(.*)/
+            state = :gathering_remainder
+          else
+            @release_log << line
+          end
+          @buffer << line
         else
           @buffer << line
         end
       end
+      @release_log = @release_log.join
       @parsed = true
     end
   end
