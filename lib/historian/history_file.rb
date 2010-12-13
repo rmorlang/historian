@@ -90,6 +90,14 @@ module Historian
       @release_log
     end
 
+    # Returns the name of the current release, either as parsed
+    # from the history file, or as provided if a release was
+    # recently performed.
+    def current_release_name
+      parse unless parsed?
+      @current_release_name
+    end
+
     # Update the release history with new release information.
     # Accepts a hash with any (or all) of four key-value pairs.
     # [:major] a message describing a major change
@@ -122,6 +130,7 @@ module Historian
       truncate pos
       if @release
         @release_log = changelog
+        @current_release_name = @release if @release.kind_of?(String)
         parse
         @release = nil
         @changes = nil
@@ -144,6 +153,9 @@ module Historian
             gathering_current_history = false
             @buffer << line
             @current_version = $1
+            if $2 =~ %r{ (.*) - [0-9]{4}/[0-9]{2}/[0-9]{2}}
+              @current_release_name = $1
+            end
           when /^=== Bugfixes$/
             significance = :patch
           when /^\* (.+)$/

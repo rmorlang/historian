@@ -121,6 +121,9 @@ describe Historian::HistoryFile do
       it { should have_history_like     :courageous_camel_history   }
       it { should have_changelog_like   :empty                      }
       it { should have_release_log_like :courageous_camel_release_log }
+      it "returns the release name with #release_name" do
+        subject.current_release_name.should eq("Courageous Camel")
+      end
     end
 
     context "with no release name" do
@@ -131,6 +134,20 @@ describe Historian::HistoryFile do
 
       it { should have_release_log_like :anonymous_release_log }
     end
+  end
+
+  context "when parsing a history file with a release and no unreleased changelog" do
+    before do
+      @io = StringIO.new(fixture :courageous_camel_history)
+      @io.extend Historian::HistoryFile
+    end
+    subject { @io }
+
+    it { should have_current_version "12.0.0" }
+    it "returns the release name with #release_name" do
+      subject.current_release_name.should eq("Courageous Camel")
+    end
+
   end
 
 
