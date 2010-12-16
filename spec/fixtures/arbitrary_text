@@ -1,0 +1,21 @@
+== In Git
+
+=== Major Changes
+* major #1
+
+=== Minor Changes
+* minor #1
+
+This line has some arbitrary text, which would be nice to support
+without having the parser blow up, really, but for now it'll have to do
+to at least be strict about the format.
+
+=== Bugfixes
+* bugfix #1
+* bugfix #2
+
+
+== 11.22.33 Addled Adder
+
+=== Bugfixes
+* more scales

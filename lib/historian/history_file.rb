@@ -84,6 +84,59 @@ module Historian
       "%d.%d.%d" % [ major, minor, patch ]
     end
 
+    # whether the history file has already been parsed
+    def parsed?
+      @parsed
+    end
+
+    # Parse the entire history file. There's generally no
+    # need to call this method -- it should be called automatically
+    # when needed.
+    def parse
+      rewind
+      @buffer = []
+      @release_log = []
+      state = :gathering_current_history
+      significance = nil
+      each_line do |line|
+        if state == :gathering_current_history
+          case line
+          when /^== ([0-9]+\.[0-9]+\.[0-9]+)(.*)/
+            state = :gathering_previous_release_log
+            @release_log << line
+            @buffer << line
+            @current_version = $1
+            if $2 =~ %r{ (.*) - [0-9]{4}/[0-9]{2}/[0-9]{2}}
+              @current_release_name = $1
+            end
+          when /^=== (.*)$/
+            significance = significance_for $1
+          when /^\* (.+)$/
+            if significance
+              changes[significance] << $1
+            else
+              raise ParseError.new "no significance preceeding history entry '#{$1}'"
+            end
+          when /^\s*$/, /^== In Git$/
+            #noop
+          else
+            raise ParseError.new("invalid history format: #{line}")
+          end
+        elsif state == :gathering_previous_release_log
+          if line =~ /^== ([0-9]+\.[0-9]+\.[0-9]+)(.*)/
+            state = :gathering_remainder
+          else
+            @release_log << line
+          end
+          @buffer << line
+        else
+          @buffer << line
+        end
+      end
+      @release_log = @release_log.join
+      @parsed = true
+    end
+
     # Alias for update_history :release => true
     def release
       update_history :release => true
@@ -143,45 +196,13 @@ module Historian
       end
     end
 
-    def parsed? #:nodoc:
-      @parsed
-    end
-
-    def parse #:nodoc:
-      rewind
-      @buffer = []
-      @release_log = []
-      state = :gathering_current_history
-      significance = nil
-      each_line do |line|
-        if state == :gathering_current_history
-          case line
-          when /^== ([0-9]+\.[0-9]+\.[0-9]+)(.*)/
-            state = :gathering_previous_release_log
-            @release_log << line
-            @buffer << line
-            @current_version = $1
-            if $2 =~ %r{ (.*) - [0-9]{4}/[0-9]{2}/[0-9]{2}}
-              @current_release_name = $1
-            end
-          when /^=== Bugfixes$/
-            significance = :patch
-          when /^\* (.+)$/
-            changes[significance] << $1
-          end
-        elsif state == :gathering_previous_release_log
-          if line =~ /^== ([0-9]+\.[0-9]+\.[0-9]+)(.*)/
-            state = :gathering_remainder
-          else
-            @release_log << line
-          end
-          @buffer << line
-        else
-          @buffer << line
-        end
+    def significance_for(string)
+      @@translation ||= SECTION_HEADERS.invert
+      if @@translation[string]
+        return @@translation[string]
+      else
+        raise ParseError.new("unknown significance '#{string}'")
       end
-      @release_log = @release_log.join
-      @parsed = true
     end
   end
 end

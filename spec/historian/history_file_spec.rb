@@ -1,6 +1,12 @@
 require 'spec_helper'
 
 describe Historian::HistoryFile do
+  def history(fixture_name)
+    StringIO.new(fixture fixture_name).tap do |io|
+      io.extend Historian::HistoryFile
+    end
+  end
+
   before do
     @io = StringIO.new ""
     @io.extend Historian::HistoryFile
@@ -164,8 +170,45 @@ describe Historian::HistoryFile do
     it "returns the changelog for the release" do
       subject.release_log.strip.should eql(fixture :courageous_camel_release_log)
     end
-
   end
+
+  context "when parsing a history with all significance categories" do
+    before do
+      @io = StringIO.new(fixture :all_types_history)
+      @io.extend Historian::HistoryFile
+      @io.parse
+    end
+    subject { @io.changes }
+
+    it "has major changes" do
+      subject[:major].should_not be_empty
+    end
+
+    it "has minor changes" do
+      subject[:minor].should_not be_empty
+    end
+
+    it "has patch changes" do
+      subject[:patch].should_not be_empty
+    end
+  end
+
+  # TODO: I've realized too late that the strict format
+  #       I'm parsing against isn't very practical. I'll need
+  #       to rework my parsing code to be more versatile.
+  context "oddly formated history files" do
+    it "raises an error when finding history without significance" do
+      lambda { history(:missing_significance).parse }.should raise_error(Historian::ParseError)
+    end
+    it "raises an error when finding an unknown significance" do
+      lambda { history(:invalid_significance).parse }.should raise_error(Historian::ParseError)
+    end
+    it "raises an error when finding arbitrary text" do
+      lambda { history(:arbitrary_text).parse }.should raise_error(Historian::ParseError)
+    end
+  end
+
+
 
 
 end
