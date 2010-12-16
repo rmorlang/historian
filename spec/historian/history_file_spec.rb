@@ -1,6 +1,20 @@
 require 'spec_helper'
 
 describe Historian::HistoryFile do
+  before do
+    @io = StringIO.new ""
+    @io.extend Historian::HistoryFile
+  end
+
+  subject { @io }
+
+  describe "#release" do
+    it "should invoke update_history" do
+      subject.should_receive(:update_history).with(:release => true)
+      subject.release
+    end
+  end
+
   context "with no history" do
     before do
       @io = StringIO.new(fixture :empty)

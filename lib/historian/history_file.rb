@@ -84,6 +84,11 @@ module Historian
       "%d.%d.%d" % [ major, minor, patch ]
     end
 
+    # Alias for update_history :release => true
+    def release
+      update_history :release => true
+    end
+
     # If a release was just performed, this will return the changelog
     # of the release. Otherwise, this is always nil.
     def release_log
