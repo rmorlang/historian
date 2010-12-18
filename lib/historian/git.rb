@@ -4,6 +4,10 @@ require 'tempfile'
 class Historian::Git
   attr_reader :repo_directory, :history
 
+  def bundle_history_file
+    amend_history_changes
+  end
+
   def initialize(dir, history)
     @repo_directory = dir
     @history = history
@@ -20,6 +24,13 @@ class Historian::Git
   end
 
 protected
+
+  def amend_history_changes
+    Tempfile.open("historian") do |file|
+      git "add", history.path
+      git "commit", history.path, "--amend", "-C", "HEAD"
+    end
+  end
 
   def commit_history_changes
     Tempfile.open("historian") do |file|

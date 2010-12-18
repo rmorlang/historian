@@ -12,12 +12,20 @@ describe Historian::Git do
     run_git "tag"
   end
 
+  def commits_count
+    run_git("log","--pretty=one").split(/\n/).size
+  end
   def commit_message_for_tag(tag)
     run_git "show", tag
   end
 
   def repo_directory
     File.expand_path("../../../tmp/repo", __FILE__)
+  end
+
+  def modified?(file)
+    base = File.basename file
+    !run_git("status", "--porcelain").grep(/#{base}/).empty?
   end
 
   def create_test_repo
@@ -45,6 +53,16 @@ describe Historian::Git do
 
   describe "#bundle_history_file" do
     before do
+      @history = history_for_repo :courageous_camel_history
+      @git = Historian::Git.new(repo_directory, @history)
+    end
+
+    subject { @git }
+
+    it "amends the previous commit to include changes to the history file" do
+      modified?(@history_file).should be_true
+      lambda { subject.bundle_history_file }.should_not change(self, :commits_count)
+      modified?(@history_file).should be_false
     end
   end
 
