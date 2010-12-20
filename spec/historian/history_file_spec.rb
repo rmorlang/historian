@@ -44,6 +44,17 @@ describe Historian::HistoryFile do
       it { should have_history_like   :patch_on_nothing }
       it { should have_changelog_like :patch_on_nothing }
     end
+
+    context "when triggering a release" do
+      before do
+        Time.stub_chain :now, :strftime => "2010/12/12"
+        @io.update_history :release => "Addled Adder"
+      end
+
+      it { should have_current_version "0.0.1" }
+      it { should have_next_version    "0.0.2" }
+      it { should have_history_like   :release_on_nothing }
+    end
   end
 
   context "with unreleased history" do

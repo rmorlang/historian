@@ -26,7 +26,7 @@ module Historian
 
     # The pending changelog for the next release. See also #release_log.
     def changelog
-      return "" unless changes?
+      return "" unless changes? || @release
 
       log = []
       if @release
