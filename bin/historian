@@ -1,12 +1,12 @@
 #!/usr/bin/env ruby
-spackle_dir = File.expand_path(File.join(File.dirname(__FILE__), '..', 'lib'))
-$LOAD_PATH.unshift(spackle_dir) unless $LOAD_PATH.include?(spackle_dir)
+historian_dir = File.expand_path(File.join(File.dirname(__FILE__), '..', 'lib'))
+$LOAD_PATH.unshift(historian_dir) unless $LOAD_PATH.include?(historian_dir)
 
 require 'historian'
 
 begin
-  Historian::Commandline.parse ARGV
-rescue => err
-  STDERR.puts err.message 
-  exit 1
+  Historian::CLI.start
+#rescue => err
+  #STDERR.puts err.message
+  #exit 1
 end
