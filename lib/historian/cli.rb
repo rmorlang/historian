@@ -9,7 +9,7 @@ class Historian::CLI < Thor
 
   def initialize(*)
     super
-    @repo_directory = ProjectScout.scan Dir.pwd, :for => :git_repository
+    @repo_directory = ProjectScout.scan Dir.pwd, :for => [ :git_repository ]
 
     history_file = File.join(repo_directory, "History.txt")
     unless File.exists? history_file
