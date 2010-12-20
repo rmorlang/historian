@@ -18,6 +18,14 @@ describe Historian::CLI do
       cli.git.repo_directory.should eq(repo_directory)
     end
 
+    it "creates a history file if none exists" do
+      ProjectScout.stub :scan => repo_directory
+      File.should_receive(:exists?).and_return(false)
+      File.stub(:open).and_return(StringIO.new)
+      File.should_receive(:open).at_least(:once).with(/History.txt/, "w")
+      cli = Historian::CLI.new
+    end
+
     it "initializes a GitHookInstaller with the repository directory" do
       Historian::Git.should_receive(:new).with(repo_directory, anything).and_return(@ghi)
       cli = Historian::CLI.new

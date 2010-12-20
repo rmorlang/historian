@@ -10,7 +10,12 @@ class Historian::CLI < Thor
   def initialize(*)
     super
     @repo_directory = ProjectScout.scan Dir.pwd, :for => :git_repository
-    @history = File.open File.join(repo_directory, "History.txt"), "w+"
+
+    history_file = File.join(repo_directory, "History.txt")
+    unless File.exists? history_file
+      File.open history_file, "w"
+    end
+    @history = File.open history_file, File::RDWR
     history.sync = true
     history.extend Historian::HistoryFile
     self.git = Historian::Git.new(repo_directory, history)
