@@ -61,13 +61,13 @@ class Historian::CLI < Thor
   desc "post_commit", "Git post-commit hook for Historian. Not intended for manual use."
   def post_commit
     if File.exists? amend_flag_file
-      git.bundle_history_file
       File.unlink amend_flag_file
+      git.bundle_history_file
     end
 
     if File.exists? release_flag_file
-      git.tag_release
       File.unlink release_flag_file
+      git.tag_release
     end
   end
 
