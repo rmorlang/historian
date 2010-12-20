@@ -34,7 +34,6 @@ class Historian::Git
           BASE=`dirname $0`
           for S in $BASE/#{hook_to_git}.d/*
           do
-          echo $S
           $S $@ || exit $?
           done
         EOF
@@ -81,6 +80,10 @@ class Historian::Git
       create_hook_scripts_dir
       FileUtils.cp hook_wrapper_script, File.join(hook_scripts_dir, "original")
     end
+
+    def update
+      create_hook_script
+    end
   end
 
 
@@ -105,6 +108,7 @@ class Historian::Git
       hook.install
       :created
     else
+      hook.update
       :exists
     end
   end

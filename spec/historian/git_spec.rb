@@ -104,8 +104,8 @@ describe Historian::Git do
         @result = @git.install_hook(@hook_sym)
       end
 
-      it "does not modify the hook file" do
-        File.should_not_receive(:open).with(@hook_script, /w/)
+      it "rewrites the hook file" do
+        File.should_receive(:open).with(@hook_script, /w/)
         @git.install_hook @hook_sym
       end
 
