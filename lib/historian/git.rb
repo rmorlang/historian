@@ -14,7 +14,7 @@ class Historian::Git
     def create_hook_script
       File.open(hook_script, "w") do |f|
         f.puts "#!/bin/bash"
-        f.puts "bundle exec historian #{hook.to_s} $@"
+        f.puts "historian #{hook.to_s} $@"
       end
       File.chmod 0755, hook_script
     end
@@ -144,7 +144,7 @@ protected
   def hook_invokes_command?(command)
     return false unless File.exists?(hook_script_for command)
     lines = File.readlines(hook_script_for command).collect { |l| l.chomp }
-    lines.first == "#!/bin/bash" && lines.grep("bundle exec historian #{command} $@")
+    lines.first == "#!/bin/bash" && lines.grep("historian #{command} $@")
   end
 
   def hook_script_for(hook)

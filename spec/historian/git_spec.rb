@@ -52,7 +52,7 @@ describe Historian::Git do
         end
 
         it "should invoke the hook exactly once" do
-          @contents.grep("bundle exec historian #{@hook_sym} $@\n").should have(1).match
+          @contents.grep("historian #{@hook_sym} $@\n").should have(1).match
         end
       end
     end
