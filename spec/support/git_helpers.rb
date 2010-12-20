@@ -35,6 +35,11 @@ module GitHelpers
     test_file = File.join repo_directory, "test"
     File.open( test_file, "w") { |f| f.puts "foo" }
     run_git "add", test_file
+
+    history_file = File.join repo_directory, "History.txt"
+    File.open history_file, "w"
+    run_git "add", history_file
+
     run_git "commit", "-m", "test commit"
   end
 

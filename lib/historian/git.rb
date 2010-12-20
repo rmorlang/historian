@@ -110,8 +110,8 @@ class Historian::Git
   end
 
   def tag_release
-    ensure_history_has_release
     commit_history_changes if history_dirty?
+    ensure_history_has_release
     Tempfile.open("historian") do |file|
       file.puts commit_message_for_tag
       file.flush

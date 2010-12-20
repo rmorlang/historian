@@ -170,7 +170,7 @@ describe Historian::Git do
       end
 
       it "commits the history file if it has unstaged changes" do
-        subject.should_receive :commit_history_changes
+        subject.should_receive(:commit_history_changes).twice
         subject.tag_release
       end
 
@@ -180,6 +180,8 @@ describe Historian::Git do
     describe "with a clean history file" do
       before do
         @history = history_for_repo :courageous_camel_history
+        run_git "add", @history.path
+        run_git "commit", "-m", "clean the history"
         @git = Historian::Git.new(repo_directory, @history)
       end
 
