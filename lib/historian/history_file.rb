@@ -94,6 +94,7 @@ module Historian
     # when needed.
     def parse
       rewind
+      @changes = nil
       @buffer = []
       @release_log = []
       state = :gathering_current_history
